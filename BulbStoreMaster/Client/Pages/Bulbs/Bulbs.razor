@@ -1,0 +1,76 @@
+﻿@page  "/Bulbs"
+@inject IBulbService bulbService
+
+<div class="card">
+    <div class="card-header bg-dark">
+        <div class="row">
+            <div class="col-sm-9">
+                <h2 class="text-info">Bulb's list</h2>
+            </div>
+            <div class="col-sm-3">
+                <a href="Bulb" class="btn btn-primary">New bulb</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (_bulbs is null)
+{
+    <DisplaySpinner />
+}
+else
+{
+    <div class="card-body">
+        <table class="table table-striped border">
+            <tr class="table-secondary">
+                <th>Id</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Power</th>
+                <th>Lumens</th>
+                <th>Color</th>
+                <th>Cod</th>
+            </tr>
+            @foreach (var item in _bulbs)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Description</td>
+                    <td>@item.type</td>
+                    <td>@item.Power</td>
+                    <td>@item.Lumens</td>
+                    <td>@item.Color</td>
+                    <td>@item.Cod</td>
+                    <td>
+                        <a href="Bulb/@item.Id"
+                           class="oi oi-pencil"></a>
+
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+}
+
+@code {
+    private IEnumerable<Bulb>? _bulbs { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        PollForUpdate();
+        await Load();
+        //
+
+    }
+    private async Task Load()
+    {
+        _bulbs = await bulbService.GetBulbsAsync();
+
+    }
+
+    private async void PollForUpdate()
+    {
+        bulbService.BulbChanged += StateHasChanged;
+        await Task.Delay(1500);
+    }
+}

@@ -1,0 +1,203 @@
+﻿@page "/bulb"
+@page "/bulb/{id:int}"
+
+@inject IBulbService bulbService;
+@inject NavigationManager NavigationManager;
+
+<PageTitle>@title</PageTitle>
+<div class="card">
+    <div class="card-header bg-dark">
+        <div class="row">
+            <div class="col-sm-9">
+                <h2 class="text-info">@title</h2>
+            </div>
+            <div class="col-sm-3">
+                <h2 class="text-info">@_message</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="@clases">
+    <DisplaySpinner />
+</div>
+
+<div class="card-body">
+    <EditForm Model="_bulb" OnValidSubmit="@(()=> taskHandler())">
+        <DataAnnotationsValidator />
+        <div class="container row flex-column g-3">
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-sm-2">
+                        <label>Description</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <InputText @bind-Value=_bulb.Description class="form-control"></InputText>
+                        <ValidationMessage For="() => _bulb.Description"></ValidationMessage>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-sm-2">
+                        <label>Type</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <InputText @bind-Value=_bulb.type class="form-control"></InputText>
+                        <ValidationMessage For="() => _bulb.type"></ValidationMessage>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-sm-2">
+                        <label>Power</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <InputNumber @bind-Value=_bulb.Power class="form-control"></InputNumber>
+                        <ValidationMessage For="() => _bulb.Power"></ValidationMessage>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-sm-2">
+                        <label>Lumens</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <InputNumber @bind-Value=_bulb.Lumens class="form-control"></InputNumber>
+                        <ValidationMessage For="() => _bulb.Lumens"></ValidationMessage>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-sm-2">
+                        <label>Color</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <InputText @bind-Value=_bulb.Color class="form-control"></InputText>
+                        <ValidationMessage For="() => _bulb.Color"></ValidationMessage>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-sm-2">
+                        <label>Cod</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <InputText @bind-Value=_bulb.Cod class="form-control"></InputText>
+                        <ValidationMessage For="() => _bulb.Cod"></ValidationMessage>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mt-4">
+                <div class="row">
+                    <div class="col-sm-2">
+                        <button class="btn btn-danger"
+                        @onclick="@( () => NavigationManager.NavigateTo("/bulbs"))">
+                            <i class="oi oi-arrow-left"></i>
+                        </button>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="btn btn-primary"
+                        @onclick="@(()=>Save(_bulb))">
+                            💾
+                        </button>
+                    </div>
+                    <div class="col-sm-6">
+                        <button type="submit" class="btn btn-danger"
+                        @onclick="@(() => Delete(_bulb))">
+                            <i class="oi oi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private string clases = "Visible";
+    private string title = "";
+    //private string btnText = "";
+    private string _message = "";
+
+    Bulb _bulb = new Bulb();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await searchAsync(Id);
+        clases = "invisible";
+    }
+    private async Task searchAsync(int? id = null)
+    {
+        if (Id == null)
+        {
+            title = "🆕";
+        }
+        else
+        {
+            title = "✍️";
+            try
+            {
+                _bulb = await bulbService.GetBulbAsync(id);
+            }
+            catch (Exception)
+            {
+                Id = null;
+                _bulb = new Bulb();
+            }
+        }
+    }
+
+    private async Task Save(Bulb bulb)
+    {
+        string sa = Id == null ? "save" : "edit";
+        await taskHandler(sa, bulb);
+    }
+
+    private async Task Delete(Bulb bulb)
+    {
+        await taskHandler("del", bulb);
+    }
+
+    private async Task taskHandler(string? op = null, Bulb? bulb = null)
+    {
+        bool yn = false;
+        clases = "visible";
+        switch (op)
+        {
+            case "edit":
+                yn = await bulbService.UpdateBulbAsync(bulb!);
+                break;
+            case "save":
+                yn = await bulbService.CreateBulbAsync(bulb!);
+                //await searchAsync(_bulb.Id);
+                break;
+            case "del":
+                if (Id is not null)
+                    yn = await bulbService.DeleteAsync(bulb!.Id);
+                break;
+            default:
+                break;
+        }
+
+        async Task<string> newBulb()
+        {
+            Id = null;
+            _bulb = new Bulb();
+            await searchAsync();
+            return "success";
+        }
+        _message = $"{op} - " + (yn ? $"{await newBulb()}" : "failure");
+
+        clases = "invisible";
+    }
+}
