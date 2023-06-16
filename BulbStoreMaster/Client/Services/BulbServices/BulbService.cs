@@ -42,10 +42,13 @@ public class BulbService : IBulbService
     {
         var bulbs = await _http.GetFromJsonAsync<IEnumerable<Bulb>>("api/Bulbs");
         if (bulbs is not null)
-            return bulbs;
+        {
+            if (bulbs!.Count() is 0)
+                Message = "There is not bulbs :\"";
 
-        if (bulbs!.Count() == 0)
-            Message = "There is not bulbs :\"";
+            return bulbs;
+        }
+
 
         throw new Exception("Bulbs not found");
     }
