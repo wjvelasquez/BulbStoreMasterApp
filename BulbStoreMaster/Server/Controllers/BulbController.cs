@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BulbStoreMaster.Server.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BulbStoreMaster.Server.Controllers;
@@ -6,11 +7,13 @@ namespace BulbStoreMaster.Server.Controllers;
 [ApiController]
 public class BulbController : ControllerBase
 {
-    private readonly DataContext _context;
+    private readonly IBulbRepository _repository;
+    //private readonly DataContext _context;
 
-    public BulbController(DataContext context)
+    public BulbController(IBulbRepository repository)
     {
-        _context = context;
+        _repository = repository;
+        //_context = context;
     }
 
     /// <summary>
@@ -18,12 +21,13 @@ public class BulbController : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpGet("/api/Bulbs")]
-    public async Task<ActionResult<Bulb>> GetBuldsAsync()
+    public async Task<ActionResult<IEnumerable<Bulb>>> GetBuldsAsync()
     {
         try
         {
-            var bulds = await _context.Bulbs!.ToListAsync();
-            return Ok(bulds);
+            var bulbs = await _repository.GetBullsAsync();
+            //var bulbs = await _context.Bulbs!.ToListAsync();
+            return Ok(bulbs);
         }
         catch (Exception)
         {
@@ -39,8 +43,9 @@ public class BulbController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Bulb>> GetBuldAsync(int? id)
     {
-        var buld = await _context.Bulbs!.FindAsync(id);
-        return Ok(buld);
+        var bulb = await _repository.GetBullByIdAsync(id);
+        //var bulb = await _context.Bulbs!.FindAsync(id);
+        return Ok(bulb);
     }
 
     /// <summary>
@@ -51,9 +56,10 @@ public class BulbController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Bulb>> CreateBulbAsync(Bulb bulb)
     {
-        await _context.AddAsync(bulb);
-        await _context.SaveChangesAsync();
-        return Ok(bulb);
+        //await _context.AddAsync(bulb);
+        //await _context.SaveChangesAsync();
+        var newBulb = await _repository.CreateAsync(bulb);
+        return Ok(newBulb);
     }
 
     /// <summary>
@@ -63,26 +69,10 @@ public class BulbController : ControllerBase
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpPut("{id}")]
-    public async Task<ActionResult<Bulb>> UpdateBulbAsync(Bulb bulb, int id)
+    public async Task<ActionResult<Bulb>> UpdateBulbAsync(Bulb bulb, int? id)
     {
-        var newBulb = await _context.Bulbs!.FirstOrDefaultAsync(b => b.Id == id);
-        if (newBulb is not null)
-        {
-            //newBulb = bulb;
-
-            newBulb.Description = bulb.Description;
-            newBulb.type = bulb.type;
-            newBulb.Power = bulb.Power;
-            newBulb.Lumens = bulb.Lumens;
-            newBulb.Color = bulb.Color;
-            newBulb.Cod = bulb.Cod;
-
-            await _context.SaveChangesAsync();
-            return Ok(newBulb);
-
-        }
-
-        return NotFound(bulb.Description);
+        var newBulb = await _repository.UpdateAsync(bulb, id);
+        return Ok(newBulb);
     }
 
     /// <summary>
@@ -91,16 +81,13 @@ public class BulbController : ControllerBase
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpDelete("{id}")]
-    public async Task<ActionResult<Bulb>> DeleteBulbAsync(int id)
+    public async Task<ActionResult<bool>> DeleteBulbAsync(int id)
     {
-        var toDelBulb = await _context.Bulbs!.FindAsync(id);
+        var toDelBulb = await _repository.DeleteAsync(id);
 
-        if (toDelBulb is not null)
-        {
-            _context.Bulbs!.Remove(toDelBulb);
-            await _context.SaveChangesAsync();
-        }
+        if (toDelBulb is true)
+            return Ok(true);
 
-        return Ok(new Bulb());
+        return BadRequest(false);
     }
 }

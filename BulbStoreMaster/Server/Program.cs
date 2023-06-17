@@ -2,6 +2,7 @@ global using Microsoft.EntityFrameworkCore;
 global using BulbStoreMaster.Server.Data;
 global using BulbStoreMaster.Shared;
 using Microsoft.AspNetCore.ResponseCompression;
+using BulbStoreMaster.Server.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,8 @@ builder.Services.AddRazorPages();
 */
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DbLite")));
+
+builder.Services.AddScoped<IBulbRepository, BulbRepository>();
 
 //wv
 builder.Services.AddEndpointsApiExplorer();

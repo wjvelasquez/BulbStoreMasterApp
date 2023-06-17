@@ -10,5 +10,5 @@ public interface IBulbService
     Task<Bulb> GetBulbAsync(int? id);
     Task<bool> CreateBulbAsync(Bulb bulb);
     Task<bool> UpdateBulbAsync(Bulb bulb);
-    Task<bool> DeleteAsync(int id);
+    Task<bool> DeleteAsync(Bulb bulb);
 }

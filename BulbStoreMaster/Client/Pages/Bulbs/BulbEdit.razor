@@ -183,7 +183,7 @@
                 break;
             case "del":
                 if (Id is not null)
-                    yn = await bulbService.DeleteAsync(bulb!.Id);
+                    yn = await bulbService.DeleteAsync(bulb!);
                 break;
             default:
                 break;

@@ -23,9 +23,9 @@ public class BulbService : IBulbService
         return result.IsSuccessStatusCode;
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(Bulb bulb)
     {
-        var result = await _http.DeleteAsync($"api/Bulb/{id}");
+        var result = await _http.DeleteAsync($"api/Bulb/{bulb.Id}");
         return result.IsSuccessStatusCode;
     }
 
@@ -40,13 +40,20 @@ public class BulbService : IBulbService
 
     public async Task<IEnumerable<Bulb>> GetBulbsAsync()
     {
-        var bulbs = await _http.GetFromJsonAsync<IEnumerable<Bulb>>("api/Bulbs");
-        if (bulbs is not null)
+        try
         {
-            if (bulbs!.Count() is 0)
-                Message = "There is not bulbs :\"";
+            var bulbs = await _http.GetFromJsonAsync<IEnumerable<Bulb>>("api/Bulbs");
+            if (bulbs is not null)
+            {
+                if (bulbs!.Count() is 0)
+                    Message = "There is not bulbs :\"";
 
-            return bulbs;
+                return bulbs;
+            }
+        }
+        catch (Exception ex)
+        {
+            Message = ex.Message;
         }
 
 
