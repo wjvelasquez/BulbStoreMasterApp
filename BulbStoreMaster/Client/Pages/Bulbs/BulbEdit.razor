@@ -9,7 +9,7 @@
     <div class="card-header bg-dark">
         <div class="row">
             <div class="col-sm-9">
-                <h2 class="text-info">@title</h2>
+                <h2 class="text-info">@titleImg</h2>
             </div>
             <div class="col-sm-3">
                 <h2 class="text-info">@_message</h2>
@@ -126,6 +126,7 @@
 
     private string clases = "Visible";
     private string title = "";
+    private string titleImg = "";
     //private string btnText = "";
     private string _message = "";
 
@@ -140,11 +141,13 @@
     {
         if (Id == null)
         {
-            title = "🆕";
+            title = "New Bulb";
+            titleImg = "🆕";
         }
         else
         {
-            title = "✍️";
+            title = "Edit Bulb";
+            titleImg = "✍️";
             try
             {
                 _bulb = await bulbService.GetBulbAsync(id);
